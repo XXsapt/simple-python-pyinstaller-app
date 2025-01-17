@@ -7,15 +7,6 @@ node {
             // Stash the compiled results
             stash name: 'compiled-results', includes: 'sources/*.py*'
         }
-
-        // stage('Install Dependencies') {
-        //     // Create a virtual environment
-        //     sh 'python3 -m venv venv'
-
-        //     // Activate the virtual environment and install pytest
-        //     sh '. venv/bin/activate && pip install pytest'
-        // }
-
         stage('Test') {
             // Activate the virtual environment and run tests
             sh '. venv/bin/activate && pytest --junit-xml=test-reports/results.xml sources/test_calc.py'
