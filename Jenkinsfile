@@ -7,14 +7,17 @@ pipeline {
                 sh 'python3 -m py_compile sources/add2vals.py sources/calc.py'
             }
         }
-        stage('Install Dependencies') { // Tambahkan tahap ini
+        stage('Install Dependencies') {
             steps {
-                sh 'pip3 install pytest'
+                // Buat virtual environment
+                sh 'python3 -m venv venv'
+                // Aktifkan virtual environment dan instal pytest
+                sh 'source venv/bin/activate && pip install pytest'
             }
         }
         stage('Test') {
             steps {
-                sh 'py.test --junit-xml test-reports/results.xml sources/test_calc.py'
+                sh 'source venv/bin/activate && pytest --junit-xml test-reports/results.xml sources/test_calc.py'
             }
         }
     }
