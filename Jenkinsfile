@@ -8,13 +8,13 @@ node {
             stash name: 'compiled-results', includes: 'sources/*.py*'
         }
 
-        stage('Install Dependencies') {
-            // Create a virtual environment
-            sh 'python3 -m venv venv'
+        // stage('Install Dependencies') {
+        //     // Create a virtual environment
+        //     sh 'python3 -m venv venv'
 
-            // Activate the virtual environment and install pytest
-            sh '. venv/bin/activate && pip install pytest'
-        }
+        //     // Activate the virtual environment and install pytest
+        //     sh '. venv/bin/activate && pip install pytest'
+        // }
 
         stage('Test') {
             // Activate the virtual environment and run tests
