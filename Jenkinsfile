@@ -60,7 +60,7 @@ pipeline {
 
             steps {
 
-                input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk melanjutkan ke tahap Deploy)'
+                input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk melanjutkan ke tahap Deploy)', ok: 'Proceed'
 
             }
 
@@ -80,22 +80,8 @@ pipeline {
 
             steps {
 
-                sh 'pip install pyinstaller'
-
-                sh 'pyinstaller --onefile sources/add2vals.py'
-
-                sleep time: 1, unit: 'MINUTES'
-
-                echo 'Pipeline has finished successfully.'
-
-            }
-            post {
-
-                success {
-
-                    archiveArtifacts 'dist/add2vals'
-
-                }
+                sh 'echo "Deploying application..."'
+                // Add your deployment steps here
 
             }
 
