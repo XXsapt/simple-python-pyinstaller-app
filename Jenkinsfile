@@ -1,29 +1,106 @@
-node {
-    try {
-        stage('Build') {
-            // Compile the Python files
-            sh 'python3 -m py_compile sources/add2vals.py sources/calc.py'
+pipeline {
 
-            // Stash the compiled results
-            stash name: 'compiled-results', includes: 'sources/*.py*'
+    agent none // Don't use any global agent
+
+    stages {
+
+        stage('Build') {
+
+            agent {
+
+                docker {
+
+                    image 'python:3.9'
+
+                }
+
+            }
+
+            steps {
+
+                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
+
+                stash(name: 'compiled-results', includes: 'sources/*.py*')
+
+            }
+
         }
+
         stage('Test') {
-            // Activate the virtual environment and run tests
-            sh '. venv/bin/activate && pytest --junit-xml=test-reports/results.xml sources/test_calc.py'
+
+            agent {
+
+                docker {
+
+                    image 'qnib/pytest'
+
+                }
+
+            }
+
+            steps {
+
+                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
+
+            }
+
+            post {
+
+                always {
+
+                    junit 'test-reports/results.xml'
+
+                }
+
+            }
+
         }
+
+        stage('Approval') {
+
+            steps {
+
+                input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk melanjutkan ke tahap Deploy)'
+
+            }
+
+        }
+
         stage('Deploy') {
-            // Deploy the application
-            sh 'echo "Deploying application..."'
-            // Add your deployment steps here
+
+            agent {
+
+                docker {
+
+                    image 'cdrx/pyinstaller-linux:python3'
+
+                }
+
+            }
+
+            steps {
+
+                sh 'pip install pyinstaller'
+
+                sh 'pyinstaller --onefile sources/add2vals.py'
+
+                sleep time: 1, unit: 'MINUTES'
+
+                echo 'Pipeline has finished successfully.'
+
+            }
+            post {
+
+                success {
+
+                    archiveArtifacts 'dist/add2vals'
+
+                }
+
+            }
+
         }
-    } catch (Exception e) {
-        // Handle exceptions and mark the build as failed
-        currentBuild.result = 'FAILURE'
-        throw e
-    } finally {
-        // Always publish the JUnit report
-        stage('Publish Test Results') {
-            junit 'test-reports/results.xml'
-        }
+
     }
+
 }
