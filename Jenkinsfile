@@ -11,6 +11,11 @@ node {
             // Activate the virtual environment and run tests
             sh '. venv/bin/activate && pytest --junit-xml=test-reports/results.xml sources/test_calc.py'
         }
+        stage('Deploy') {
+            // Deploy the application
+            sh 'echo "Deploying application..."'
+            // Add your deployment steps here
+        }
     } catch (Exception e) {
         // Handle exceptions and mark the build as failed
         currentBuild.result = 'FAILURE'
