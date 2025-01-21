@@ -38,8 +38,9 @@ node {
         withDockerContainer(image: 'python:3-alpine', args: '--entrypoint=""') {
             // Install PyInstaller dan buat binary
             sh '''
-            pip install pyinstaller
-            pyinstaller --onefile sources/add2vals.py
+            pip install --user pytest
+            export PATH=$PATH:~/.local/bin
+            py.test --junit-xml test-reports/results.xml sources/test_calc.py
             '''
             // Arsipkan binary hasil build
             archiveArtifacts artifacts: 'dist/add2vals', allowEmptyArchive: true
