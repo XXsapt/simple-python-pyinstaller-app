@@ -35,15 +35,9 @@ node {
     stage('Deploy') {
         checkout scm
         // Gunakan PyInstaller di Python 3
-        withDockerContainer(image: 'python:3-alpine', args: '--entrypoint=""') {
-            // Install PyInstaller dan buat binary
-            sh '''
-            pip install --user pytest
-            export PATH=$PATH:~/.local/bin
-            py.test --junit-xml test-reports/results.xml sources/test_calc.py
-            '''
-            // Arsipkan binary hasil build
-            archiveArtifacts artifacts: 'dist/add2vals', allowEmptyArchive: true
+        withDockerContainer(image: 'python:3-alpine', args: '--entrypoint="" -u root') {
+         sh 'pip install pytest'
+         sh 'py.test --junit-xml test-reports/results.xml sources/test_calc.py'
         }
         echo 'Sleep for 1 min'
         sleep time: 60, unit: 'SECONDS'
