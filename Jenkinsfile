@@ -73,9 +73,14 @@ pipeline {
                 sh '''#!/bin/bash
                     echo "Deploying application..."
                     . myenv/bin/activate
-                    # Tambahkan perintah deploy Anda di sini
-                    # Contoh: Menjalankan skrip deploy.sh
-                    ./deploy.sh
+                    # Pastikan file deploy.sh ada dan memiliki izin eksekusi
+                    if [ -f ./deploy.sh ]; then
+                        chmod +x ./deploy.sh
+                        ./deploy.sh
+                    else
+                        echo "Error: deploy.sh not found!"
+                        exit 1
+                    fi
                 '''
             }
         }
