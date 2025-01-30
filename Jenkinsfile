@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        python 'Python-3.x' // Sesuaikan dengan nama instalasi Python yang Anda buat
+    }
     stages {
         stage('Build') {
             steps {
