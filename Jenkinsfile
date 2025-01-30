@@ -42,32 +42,32 @@ pipeline {
             }
         }
 
-        // Tahap Konfirmasi Manual Sebelum Deploy
-        stage('Confirm Deploy') {
+        // Tahap Manual Approval (Kriteria 4)
+        stage('Manual Approval') {
             steps {
                 script {
                     // Menampilkan pesan dan menunggu konfirmasi manual
                     def userInput = input(
                         id: 'userInput', 
-                        message: 'Lanjutkan ke tahap deploy?', 
+                        message: 'Lanjutkan ke tahap Deploy?', 
                         parameters: [
                             choice(
-                                choices: ['Ya', 'Tidak'],
-                                description: 'Pilih "Ya" untuk melanjutkan deploy atau "Tidak" untuk membatalkan.',
+                                choices: ['Proceed', 'Abort'],
+                                description: 'Pilih "Proceed" untuk melanjutkan deploy atau "Abort" untuk membatalkan.',
                                 name: 'DeployConfirmation'
                             )
                         ]
                     )
 
-                    // Jika pengguna memilih "Tidak", batalkan pipeline
-                    if (userInput == 'Tidak') {
+                    // Jika pengguna memilih "Abort", batalkan pipeline
+                    if (userInput == 'Abort') {
                         error("Deploy dibatalkan oleh pengguna.")
                     }
                 }
             }
         }
 
-        // Tahap Deploy
+        // Tahap Deploy (Kriteria 2)
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
@@ -81,6 +81,17 @@ pipeline {
                         echo "Error: deploy.sh not found!"
                         exit 1
                     fi
+                '''
+            }
+        }
+
+        // Jeda 1 Menit Setelah Deploy (Kriteria 3)
+        stage('Wait for 1 Minute') {
+            steps {
+                sh '''#!/bin/bash
+                    echo "Menunggu 1 menit sebelum mengakhiri pipeline..."
+                    sleep 60
+                    echo "Pipeline akan segera berakhir."
                 '''
             }
         }
