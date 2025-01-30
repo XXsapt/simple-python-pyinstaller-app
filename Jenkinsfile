@@ -2,36 +2,48 @@ pipeline {
     agent any
 
     stages {
-        // Tahap Setup Virtual Environment
+        // 1️⃣ Instal dependensi sebelum membuat virtual environment
+        stage('Install Dependencies') {
+            steps {
+                sh '''#!/bin/bash
+                    echo "Installing dependencies..."
+                    apt-get update && apt-get install -y python3 python3-venv
+                '''
+            }
+        }
+
+        // 2️⃣ Setup Virtual Environment
         stage('Setup Virtual Environment') {
             steps {
                 sh '''#!/bin/bash
                     echo "Setting up virtual environment..."
-                    python3 -m venv myenv
-                    . myenv/bin/activate
+                    python3 -m venv myenv || { echo "Failed to create virtual environment"; exit 1; }
+                    source myenv/bin/activate || . myenv/bin/activate
+                    python3 -m ensurepip --default-pip
+                    pip install --upgrade pip
                     pip install pytest
                 '''
             }
         }
 
-        // Tahap Build
+        // 3️⃣ Build Aplikasi
         stage('Build') {
             steps {
                 sh '''#!/bin/bash
                     echo "Building application..."
-                    . myenv/bin/activate
+                    source myenv/bin/activate || . myenv/bin/activate
                     python3 -m py_compile sources/add2vals.py sources/calc.py
                 '''
                 stash(name: 'compiled-results', includes: 'sources/*.py*')
             }
         }
 
-        // Tahap Test
+        // 4️⃣ Test Aplikasi
         stage('Test') {
             steps {
                 sh '''#!/bin/bash
                     echo "Running tests..."
-                    . myenv/bin/activate
+                    source myenv/bin/activate || . myenv/bin/activate
                     python3 -m pytest --junit-xml test-reports/results.xml sources/test_calc.py
                 '''
             }
@@ -42,11 +54,10 @@ pipeline {
             }
         }
 
-        // Tahap Manual Approval (Kriteria 4)
+        // 5️⃣ Manual Approval sebelum Deploy
         stage('Manual Approval') {
             steps {
                 script {
-                    // Menampilkan pesan dan menunggu konfirmasi manual
                     def userInput = input(
                         id: 'userInput', 
                         message: 'Lanjutkan ke tahap Deploy?', 
@@ -59,7 +70,6 @@ pipeline {
                         ]
                     )
 
-                    // Jika pengguna memilih "Abort", batalkan pipeline
                     if (userInput == 'Abort') {
                         error("Deploy dibatalkan oleh pengguna.")
                     }
@@ -67,13 +77,12 @@ pipeline {
             }
         }
 
-        // Tahap Deploy (Kriteria 2)
+        // 6️⃣ Deploy Aplikasi
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
                     echo "Deploying application..."
-                    . myenv/bin/activate
-                    # Pastikan file deploy.sh ada dan memiliki izin eksekusi
+                    source myenv/bin/activate || . myenv/bin/activate
                     if [ -f ./deploy.sh ]; then
                         chmod +x ./deploy.sh
                         ./deploy.sh
@@ -85,7 +94,7 @@ pipeline {
             }
         }
 
-        // Jeda 1 Menit Setelah Deploy (Kriteria 3)
+        // 7️⃣ Jeda 1 Menit setelah Deploy
         stage('Wait for 1 Minute') {
             steps {
                 sh '''#!/bin/bash
