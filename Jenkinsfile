@@ -63,8 +63,10 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                chmod +x deploy.sh
-                ./deploy.sh
+                sh '''
+                    chmod +x deploy.sh
+                    ./deploy.sh
+                '''
                 sleep 60  // Jeda 1 menit
             }
         }
