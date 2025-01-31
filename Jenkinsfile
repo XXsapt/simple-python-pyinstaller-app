@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh './deploy.sh'
-                sleep 60  # Jeda 1 menit
+                sleep 60  // Jeda 1 menit
             }
         }
     }
